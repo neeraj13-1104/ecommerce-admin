@@ -1,27 +1,32 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("ALL");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
-  // ---------------- FETCH PRODUCTS ----------------
+  // 🔥 PAGINATION STATE
+  const [page, setPage] = useState(1);
+  const [limit] = useState(8);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // ---------------- FETCH PRODUCTS (BACKEND PAGINATION + CATEGORY) ----------------
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/products/cart");
+      const res = await axios.get(
+        `http://localhost:5000/api/products/cart`,
+        {
+          params: {
+            page,
+            limit,
+            category: selectedCategory,
+          },
+        }
+      );
+
       setProducts(res.data.data || []);
+      setTotalPages(res.data.totalPages || 1);
     } catch (err) {
       console.log("Dashboard fetch error", err);
     }
@@ -39,8 +44,12 @@ const Dashboard = () => {
     }
   };
 
+  // 🔁 REFRESH PRODUCTS WHEN PAGE OR CATEGORY CHANGES
   useEffect(() => {
     fetchProducts();
+  }, [page, selectedCategory]);
+
+  useEffect(() => {
     fetchCategories();
   }, []);
 
@@ -48,119 +57,63 @@ const Dashboard = () => {
   const totalProducts = products.length;
   const totalStock = products.reduce((sum, p) => sum + (p.stock || 0), 0);
 
-  // ---------------- FILTER ----------------
-  const filteredProducts =
-    selectedCategory === "ALL"
-      ? products
-      : products.filter(
-          (p) =>
-            p.category?.trim().toLowerCase() ===
-            selectedCategory.trim().toLowerCase()
-        );
-
-  // ---------------- CHART DATA ----------------
-  const categoryChartData = categories.map((cat) => ({
-    name: cat,
-    count: products.filter(
-      (p) => p.category?.trim().toLowerCase() === cat.trim().toLowerCase()
-    ).length,
-  }));
-
-  const COLORS = ["#2563eb", "#22c55e", "#f97316", "#ec4899", "#a855f7"];
-
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">📊 Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-6">🛒 Admin Dashboard</h1>
 
       {/* ---------------- STATS ---------------- */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-          <p className="text-gray-500">Total Products</p>
+        <div className="bg-white p-6 rounded-xl shadow">
+          <p className="text-gray-500">Products (Current Page)</p>
           <h2 className="text-3xl font-bold text-blue-600">{totalProducts}</h2>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+        <div className="bg-white p-6 rounded-xl shadow">
           <p className="text-gray-500">Total Categories</p>
-          <h2 className="text-3xl font-bold text-green-600">{categories.length}</h2>
+          <h2 className="text-3xl font-bold text-green-600">
+            {categories.length}
+          </h2>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-          <p className="text-gray-500">Total Stock</p>
+        <div className="bg-white p-6 rounded-xl shadow">
+          <p className="text-gray-500">Total Stock (Page)</p>
           <h2 className="text-3xl font-bold text-purple-600">{totalStock}</h2>
-        </div>
-      </div>
-
-      {/* ---------------- CHARTS ---------------- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-        {/* BAR CHART */}
-        <div className="bg-white p-4 rounded-xl shadow hover:shadow-lg transition">
-          <h2 className="font-semibold mb-4">Products by Category</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={categoryChartData}>
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar
-                dataKey="count"
-                fill="#2563eb"
-                radius={[5, 5, 0, 0]}
-                barSize={40}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* PIE CHART */}
-        <div className="bg-white p-4 rounded-xl shadow hover:shadow-lg transition">
-          <h2 className="font-semibold mb-4">Category Distribution</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={categoryChartData}
-                dataKey="count"
-                nameKey="name"
-                outerRadius={100}
-                innerRadius={40}
-                label={({ name, percent }) =>
-                  `${name} ${(percent * 100).toFixed(0)}%`
-                }
-              >
-                {categoryChartData.map((_, index) => (
-                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
         </div>
       </div>
 
       {/* ---------------- CATEGORY FILTER ---------------- */}
       <div className="bg-white p-4 rounded-xl shadow mb-6">
         <h2 className="font-semibold mb-3">Filter by Category</h2>
+
         <div className="flex flex-wrap gap-3">
           <button
-            onClick={() => setSelectedCategory("ALL")}
-            className={`px-4 py-2 rounded-full font-medium transition flex items-center gap-2 ${
-              selectedCategory === "ALL"
+            onClick={() => {
+              setSelectedCategory("all");
+              setPage(1);
+            }}
+            className={`px-4 py-2 rounded-full font-medium ${
+              selectedCategory === "all"
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 hover:bg-gray-300"
             }`}
           >
-            {selectedCategory === "ALL" && "✔️"} ALL
+            ALL
           </button>
 
           {categories.map((cat, i) => (
             <button
               key={i}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-full font-medium transition flex items-center gap-2 ${
+              onClick={() => {
+                setSelectedCategory(cat);
+                setPage(1);
+              }}
+              className={`px-4 py-2 rounded-full font-medium ${
                 selectedCategory === cat
                   ? "bg-blue-600 text-white"
                   : "bg-blue-100 hover:bg-blue-200"
               }`}
             >
-              {selectedCategory === cat && "✔️"} {cat}
+              {cat}
             </button>
           ))}
         </div>
@@ -169,14 +122,14 @@ const Dashboard = () => {
       {/* ---------------- PRODUCTS PREVIEW ---------------- */}
       <div>
         <h2 className="text-xl font-semibold mb-4">
-          Products Preview ({selectedCategory})
+          Products ({selectedCategory})
         </h2>
 
-        {filteredProducts.length === 0 ? (
+        {products.length === 0 ? (
           <p className="text-gray-500">No products found</p>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {filteredProducts.map((item) => {
+            {products.map((item) => {
               const imageUrl = item.thumbnail
                 ? item.thumbnail.startsWith("http")
                   ? item.thumbnail
@@ -193,13 +146,38 @@ const Dashboard = () => {
                     alt={item.title}
                     className="h-32 w-full object-cover rounded mb-2"
                   />
-                  <h3 className="font-semibold text-sm truncate">{item.title}</h3>
+                  <h3 className="font-semibold text-sm truncate">
+                    {item.title}
+                  </h3>
                   <p className="text-xs text-gray-600">₹ {item.price}</p>
                 </div>
               );
             })}
           </div>
         )}
+      </div>
+
+      {/* ---------------- PAGINATION ---------------- */}
+      <div className="flex justify-center items-center gap-4 mt-8">
+        <button
+          disabled={page === 1}
+          onClick={() => setPage((p) => p - 1)}
+          className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+        >
+          ⬅ Prev
+        </button>
+
+        <span className="font-medium">
+          Page {page} of {totalPages}
+        </span>
+
+        <button
+          disabled={page === totalPages}
+          onClick={() => setPage((p) => p + 1)}
+          className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+        >
+          Next ➡
+        </button>
       </div>
     </div>
   );

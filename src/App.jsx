@@ -1,23 +1,24 @@
 import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 
 import Dashboard from "./pages/Dashboard";
 import Items from "./pages/Items";
 import Management from "./pages/Management";
-import Settings from "./pages/Settings";
-import Notifications from "./pages/Notifications";
-import Help from "./pages/Help";
 import Auth from "./pages/Auth";
 import Carousel from "./pages/Carousel";
 import Offers from "./pages/Offer";
 import Order from "./pages/Order";
 
-
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem("adminToken"));
   const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("adminUser"))
+    JSON.parse(localStorage.getItem("adminUser")),
   );
 
   const ProtectedLayout = ({ children, role }) => {
@@ -27,9 +28,7 @@ const App = () => {
     return (
       <div className="flex">
         <Sidebar user={user} setToken={setToken} setUser={setUser} />
-        <div className="flex-1 p-6 bg-gray-100 min-h-screen">
-          {children}
-        </div>
+        <div className="flex-1 p-6 bg-gray-100 min-h-screen">{children}</div>
       </div>
     );
   };
@@ -44,16 +43,29 @@ const App = () => {
 
         <Route
           path="/"
-          element={<ProtectedLayout><Dashboard /></ProtectedLayout>}
+          element={
+            <ProtectedLayout>
+              <Dashboard />
+            </ProtectedLayout>
+          }
         />
 
         <Route
           path="/items"
-          element={<ProtectedLayout><Items /></ProtectedLayout>}
+          element={
+            <ProtectedLayout>
+              <Items />
+            </ProtectedLayout>
+          }
         />
-       <Route path="/offers" element={<ProtectedLayout role="superadmin">
-<Offers />             </ProtectedLayout>
-} />
+        <Route
+          path="/offers"
+          element={
+            <ProtectedLayout role="superadmin">
+              <Offers />{" "}
+            </ProtectedLayout>
+          }
+        />
 
         {/* 🔥 SUPER ADMIN ONLY */}
         <Route
@@ -66,48 +78,21 @@ const App = () => {
         />
 
         <Route
-          path="/settings"
+          path="/carousel"
           element={
             <ProtectedLayout role="superadmin">
-              <Settings />
+              <Carousel />
             </ProtectedLayout>
           }
         />
-
         <Route
-          path="/notifications"
+          path="/order"
           element={
             <ProtectedLayout role="superadmin">
-              <Notifications />
+              <Order />
             </ProtectedLayout>
           }
         />
-
-        <Route
-  path="/help"
-  element={
-    <ProtectedLayout role="superadmin">
-      <Help />
-    </ProtectedLayout>
-  }
-/>
-
-<Route
-  path="/carousel"
-  element={
-    <ProtectedLayout role="superadmin">
-      <Carousel />
-    </ProtectedLayout>
-  }
-/>
-<Route
-  path="/order"
-  element={
-    <ProtectedLayout role="superadmin">
-      <Order />
-    </ProtectedLayout>
-  }
-/>
 
         <Route path="*" element={<Navigate to={token ? "/" : "/auth"} />} />
       </Routes>

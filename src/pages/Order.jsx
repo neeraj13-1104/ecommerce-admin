@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 
+const BASE_URL = "http://localhost:5000";
+
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,20 +14,16 @@ const AdminOrders = () => {
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-
       const res = await axios.get(
-        "http://localhost:5000/api/orders/admin/all",
+        `${BASE_URL}/api/orders/admin/all`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-
       setOrders(res.data.orders || []);
-    } catch (error) {
-      console.error(error);
-      alert("Orders fetch failed");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Failed to fetch orders");
     } finally {
       setLoading(false);
     }
@@ -35,61 +33,80 @@ const AdminOrders = () => {
   const updateStatus = async (orderId, status) => {
     try {
       setUpdatingId(orderId);
-
       await axios.put(
-        `http://localhost:5000/api/orders/admin/${orderId}/status`,
+        `${BASE_URL}/api/orders/admin/status/${orderId}`,
         { status },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      // 🔥 better UX → locally update instead of refetch
       setOrders((prev) =>
-        prev.map((order) =>
-          order._id === orderId ? { ...order, status } : order
+        prev.map((o) =>
+          o._id === orderId ? { ...o, status } : o
         )
       );
-    } catch (error) {
-      console.error(error);
-      alert("Status update failed");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Status update failed");
     } finally {
       setUpdatingId(null);
     }
   };
 
-  /* ================= USE EFFECT ================= */
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
 
+  const formatPrice = (amt) => `₹ ${Number(amt || 0).toFixed(2)}`;
+
+  const statusStyle = (status) => {
+    switch (status) {
+      case "DELIVERED":
+        return "bg-green-100 text-green-700";
+      case "CANCELLED":
+        return "bg-red-100 text-red-700";
+      case "CONFIRMED":
+        return "bg-blue-100 text-blue-700";
+      case "SHIPPED":
+        return "bg-purple-100 text-purple-700";
+      default:
+        return "bg-yellow-100 text-yellow-700"; // PLACED
+    }
+  };
+
   if (loading) {
     return (
-      <p className="text-center mt-10 text-lg font-semibold">
+      <div className="flex justify-center items-center h-screen text-lg font-semibold">
         Loading orders...
-      </p>
+      </div>
     );
   }
 
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">📦 Orders Management</h1>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">📦 Order Management</h1>
+        <p className="text-gray-500 mt-1">
+          Manage all customer orders from here
+        </p>
+      </div>
 
       {orders.length === 0 ? (
-        <p className="text-center text-gray-500">No orders found</p>
+        <div className="bg-white p-10 rounded shadow text-center text-gray-500">
+          No orders found
+        </div>
       ) : (
-        <div className="overflow-x-auto bg-white shadow rounded-lg">
+        <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
           <table className="min-w-full text-sm">
-            <thead className="bg-purple-600 text-white">
+            <thead className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
               <tr>
-                <th className="px-4 py-3 text-left">Order ID</th>
-                <th className="px-4 py-3 text-left">Customer</th>
-                <th className="px-4 py-3 text-left">Email</th>
-                <th className="px-4 py-3 text-left">Amount</th>
-                <th className="px-4 py-3 text-left">Status</th>
-                <th className="px-4 py-3 text-left">Update</th>
+                <th className="px-4 py-4 text-left">Order ID</th>
+                <th className="px-4 py-4 text-left">Customer</th>
+                <th className="px-4 py-4 text-left">Email</th>
+                <th className="px-4 py-4 text-left">Amount</th>
+                <th className="px-4 py-4 text-left">Status</th>
+                <th className="px-4 py-4 text-left">Action</th>
               </tr>
             </thead>
 
@@ -99,34 +116,32 @@ const AdminOrders = () => {
                   key={order._id}
                   className="border-b hover:bg-gray-50 transition"
                 >
-                  <td className="px-4 py-3 text-xs text-gray-500">
+                  <td className="px-4 py-3 text-xs text-gray-500 max-w-[160px] truncate">
                     {order._id}
                   </td>
+
                   <td className="px-4 py-3 font-medium">
                     {order.user?.name || "N/A"}
                   </td>
+
                   <td className="px-4 py-3">
                     {order.user?.email || "N/A"}
                   </td>
+
                   <td className="px-4 py-3 font-semibold">
-                    ₹ {order.totalAmount}
+                    {formatPrice(order.finalAmount)}
                   </td>
+
                   <td className="px-4 py-3">
                     <span
-                      className={`px-2 py-1 rounded text-xs font-semibold
-                      ${
-                        order.status === "Delivered"
-                          ? "bg-green-100 text-green-700"
-                          : order.status === "Cancelled"
-                          ? "bg-red-100 text-red-700"
-                          : order.status === "Confirmed"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle(
+                        order.status
+                      )}`}
                     >
                       {order.status}
                     </span>
                   </td>
+
                   <td className="px-4 py-3">
                     <select
                       value={order.status}
@@ -134,12 +149,13 @@ const AdminOrders = () => {
                       onChange={(e) =>
                         updateStatus(order._id, e.target.value)
                       }
-                      className="border rounded px-2 py-1 text-sm disabled:opacity-60"
+                      className="border rounded-lg px-3 py-1 text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-60"
                     >
-                      <option value="Pending">Pending</option>
-                      <option value="Confirmed">Confirmed</option>
-                      <option value="Delivered">Delivered</option>
-                      <option value="Cancelled">Cancelled</option>
+                      <option value="PLACED">PLACED</option>
+                      <option value="CONFIRMED">CONFIRMED</option>
+                      <option value="SHIPPED">SHIPPED</option>
+                      <option value="DELIVERED">DELIVERED</option>
+                      <option value="CANCELLED">CANCELLED</option>
                     </select>
                   </td>
                 </tr>

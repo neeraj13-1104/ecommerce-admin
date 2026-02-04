@@ -58,11 +58,11 @@ const Dashboard = () => {
   const totalStock = products.reduce((sum, p) => sum + (p.stock || 0), 0);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">🛒 Admin Dashboard</h1>
+    <div className="p-3 sm:p-4 md:p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6">🛒 Admin Dashboard</h1>
 
       {/* ---------------- STATS ---------------- */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl shadow">
           <p className="text-gray-500">Products (Current Page)</p>
           <h2 className="text-3xl font-bold text-blue-600">{totalProducts}</h2>
@@ -85,13 +85,13 @@ const Dashboard = () => {
       <div className="bg-white p-4 rounded-xl shadow mb-6">
         <h2 className="font-semibold mb-3">Filter by Category</h2>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-nowrap gap-3 overflow-x-auto pb-2 scrollbar-hide">
           <button
             onClick={() => {
               setSelectedCategory("all");
               setPage(1);
             }}
-            className={`px-4 py-2 rounded-full font-medium ${
+            className={`px-4 py-2 rounded-full font-medium text-sm sm:text-base whitespace-nowrap flex-shrink-0 ${
               selectedCategory === "all"
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 hover:bg-gray-300"

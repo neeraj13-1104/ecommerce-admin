@@ -32,11 +32,9 @@ const Items = () => {
   const fetchProducts = async (pageNumber = page) => {
     try {
       setListLoading(true);
-
       const res = await axios.get(
         `http://localhost:5000/api/products/cart?page=${pageNumber}&limit=${limit}`
       );
-
       setProducts(res.data.data || []);
       setPage(res.data.currentPage);
       setTotalPages(res.data.totalPages);
@@ -132,7 +130,6 @@ const Items = () => {
   /* ---------- DELETE ---------- */
   const deleteProduct = async (id) => {
     if (!window.confirm("Delete this product?")) return;
-
     try {
       await axios.delete(`http://localhost:5000/api/products/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -144,189 +141,206 @@ const Items = () => {
     }
   };
 
-  /* ---------- PAGINATION NUMBERS ---------- */
-  const getPages = () => {
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
-  };
+  const getPages = () =>
+    Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <div className="p-6 space-y-10 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold">🛒 Product Management</h1>
+    <div className="p-3 sm:p-4 md:p-6 space-y-8 max-w-7xl mx-auto">
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
+        🛒 Product Management
+      </h1>
 
-      {/* ================= FORM ================= */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-xl rounded-2xl p-6 w-full max-w-md"
-      >
-        <h2 className="text-xl font-semibold mb-4">
-          {isEditMode ? "✏️ Edit Product" : "➕ Add New Product"}
-        </h2>
-
-        <input
-          className="border p-2 w-full mb-3 rounded"
-          placeholder="Product Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-
-        <select
-          className="border p-2 w-full mb-3 rounded"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
+      {/* ===== FORM + TABLE LAYOUT ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* ================= FORM ================= */}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white shadow-xl rounded-2xl p-4 sm:p-6 w-full max-w-md"
         >
-          <option value="">Select Category</option>
-          {categories.map((c, i) => (
-            <option key={i} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+          <h2 className="text-lg sm:text-xl font-semibold mb-4">
+            {isEditMode ? "✏️ Edit Product" : "➕ Add New Product"}
+          </h2>
 
-        <input
-          className="border p-2 w-full mb-3 rounded"
-          type="number"
-          placeholder="Price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-        />
+          <input
+            className="border p-2 w-full mb-3 rounded"
+            placeholder="Product Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
 
-        <input
-          className="border p-2 w-full mb-3 rounded"
-          type="number"
-          placeholder="Stock"
-          value={stock}
-          onChange={(e) => setStock(e.target.value)}
-        />
-
-        <input
-          type="file"
-          className="mb-4"
-          onChange={(e) => setImage(e.target.files[0])}
-        />
-
-        <div className="flex gap-3">
-          <button
-            disabled={loading}
-            className={`${
-              isEditMode
-                ? "bg-green-600 hover:bg-green-700"
-                : "bg-indigo-600 hover:bg-indigo-700"
-            } text-white w-full py-2 rounded-lg`}
+          <select
+            className="border p-2 w-full mb-3 rounded"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
           >
-            {loading
-              ? "Saving..."
-              : isEditMode
-              ? "Update Product"
-              : "Add Product"}
-          </button>
+            <option value="">Select Category</option>
+            {categories.map((c, i) => (
+              <option key={i} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
 
-          {isEditMode && (
+          <input
+            className="border p-2 w-full mb-3 rounded"
+            type="number"
+            placeholder="Price"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+          />
+
+          <input
+            className="border p-2 w-full mb-3 rounded"
+            type="number"
+            placeholder="Stock"
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
+          />
+
+          <input
+            type="file"
+            className="mb-4"
+            onChange={(e) => setImage(e.target.files[0])}
+          />
+
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <button
-              type="button"
-              onClick={resetForm}
-              className="border px-4 rounded-lg"
+              disabled={loading}
+              className={`${
+                isEditMode
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-indigo-600 hover:bg-indigo-700"
+              } text-white w-full py-2 rounded-lg`}
             >
-              Cancel
+              {loading
+                ? "Saving..."
+                : isEditMode
+                ? "Update Product"
+                : "Add Product"}
             </button>
+
+            {isEditMode && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="border px-4 py-2 rounded-lg"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
+
+        {/* ================= PRODUCT LIST ================= */}
+        <div className="bg-white shadow-xl rounded-2xl p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-semibold mb-4">
+            All Products
+          </h2>
+
+          {listLoading ? (
+            <p>Loading products...</p>
+          ) : products.length === 0 ? (
+            <p>No products found</p>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full border rounded-lg">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="p-2 sm:p-3 text-sm sm:text-base">Image</th>
+                      <th className="p-2 sm:p-3 text-sm sm:text-base">Title</th>
+                      <th className="p-2 sm:p-3 text-sm sm:text-base">Price</th>
+                      <th className="p-2 sm:p-3 text-sm sm:text-base">Stock</th>
+                      <th className="p-2 sm:p-3 text-sm sm:text-base text-center">
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {products.map((p) => (
+                      <tr key={p._id} className="border-t hover:bg-gray-50">
+                        <td className="p-2 sm:p-3">
+                          <img
+                            src={
+                              p.thumbnail?.startsWith("http")
+                                ? p.thumbnail
+                                : `http://localhost:5000${p.thumbnail}`
+                            }
+                            alt={p.title}
+                            className="h-10 w-10 sm:h-12 sm:w-12 rounded object-cover"
+                          />
+                        </td>
+
+                        <td className="p-2 sm:p-3 text-sm sm:text-base font-medium whitespace-nowrap">
+                          {p.title}
+                        </td>
+
+                        <td className="p-2 sm:p-3 text-sm sm:text-base whitespace-nowrap">
+                          ₹ {p.price}
+                        </td>
+
+                        <td className="p-2 sm:p-3 text-sm sm:text-base whitespace-nowrap">
+                          {p.stock}
+                        </td>
+
+                        <td className="p-2 sm:p-3 text-center flex flex-col sm:flex-row gap-1 sm:gap-3 text-sm sm:text-base whitespace-nowrap">
+                          <button
+                            onClick={() => handleEdit(p)}
+                            className="text-blue-600 hover:text-blue-800"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => deleteProduct(p._id)}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* ===== PAGINATION ===== */}
+              <div className="flex justify-center mt-6 sm:mt-8 px-2">
+                <div className="flex gap-1 sm:gap-2 flex-wrap justify-center text-xs sm:text-base">
+                  <button
+                    disabled={page === 1}
+                    onClick={() => fetchProducts(page - 1)}
+                    className="px-2 sm:px-3 py-1 border rounded"
+                  >
+                    Prev
+                  </button>
+
+                  {getPages().map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => fetchProducts(p)}
+                      className={`px-2 sm:px-3 py-1 rounded ${
+                        page === p
+                          ? "bg-indigo-600 text-white"
+                          : "border hover:bg-gray-100"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+
+                  <button
+                    disabled={page === totalPages}
+                    onClick={() => fetchProducts(page + 1)}
+                    className="px-2 sm:px-3 py-1 border rounded disabled:opacity-40"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
-      </form>
-
-      {/* ================= PRODUCT LIST ================= */}
-      <div className="bg-white shadow-xl rounded-2xl p-6">
-        <h2 className="text-xl font-semibold mb-4">All Products</h2>
-
-        {listLoading ? (
-          <p>Loading products...</p>
-        ) : products.length === 0 ? (
-          <p>No products found</p>
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full border rounded-lg">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="p-3">Image</th>
-                    <th className="p-3">Title</th>
-                    <th className="p-3">Price</th>
-                    <th className="p-3">Stock</th>
-                    <th className="p-3 text-center">Action</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {products.map((p) => (
-                    <tr key={p._id} className="border-t hover:bg-gray-50">
-                      <td className="p-3">
-                        <img
-                          src={
-                            p.thumbnail?.startsWith("http")
-                              ? p.thumbnail
-                              : `http://localhost:5000${p.thumbnail}`
-                          }
-                          alt={p.title}
-                          className="h-12 w-12 rounded object-cover"
-                        />
-                      </td>
-                      <td className="p-3 font-medium">{p.title}</td>
-                      <td className="p-3">₹ {p.price}</td>
-                      <td className="p-3">{p.stock}</td>
-                      <td className="p-3 text-center space-x-3">
-                        <button
-                          onClick={() => handleEdit(p)}
-                          className="text-blue-600 hover:text-blue-800"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => deleteProduct(p._id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* ===== NUMBERED PAGINATION ===== */}
-            <div className="flex justify-center mt-8">
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  disabled={page === 1}
-                  onClick={() => fetchProducts(page - 1)}
-                  className="px-3 py-1 border rounded disabled:opacity-40"
-                >
-                  Prev
-                </button>
-
-                {getPages().map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => fetchProducts(p)}
-                    className={`px-3 py-1 rounded ${
-                      page === p
-                        ? "bg-indigo-600 text-white"
-                        : "border hover:bg-gray-100"
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
-
-                <button
-                  disabled={page === totalPages}
-                  onClick={() => fetchProducts(page + 1)}
-                  className="px-3 py-1 border rounded disabled:opacity-40"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          </>
-        )}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -15,7 +16,7 @@ const Dashboard = () => {
   const fetchProducts = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/products/cart`,
+        `${BASE_URL}/api/products/cart`,
         {
           params: {
             page,
@@ -36,7 +37,7 @@ const Dashboard = () => {
   const fetchCategories = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/products/categories"
+        `${BASE_URL}/api/products/categories`
       );
       setCategories(res.data?.data || []);
     } catch (err) {
@@ -133,7 +134,7 @@ const Dashboard = () => {
               const imageUrl = item.thumbnail
                 ? item.thumbnail.startsWith("http")
                   ? item.thumbnail
-                  : `http://localhost:5000${item.thumbnail}`
+                  : `${BASE_URL}${item.thumbnail}`
                 : "https://via.placeholder.com/150";
 
               return (

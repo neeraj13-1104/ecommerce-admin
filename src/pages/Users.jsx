@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -8,7 +9,7 @@ const Users = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/users");
+        const res = await axios.get("${BASE_URL}/api/users");
         setUsers(res.data);
       } catch (err) {
         console.error("Error fetching users:", err);

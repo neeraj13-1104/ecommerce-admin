@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const Offers = () => {
   const [offers, setOffers] = useState([]);
@@ -28,7 +29,7 @@ const Offers = () => {
 
   const fetchOffers = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/offers/active");
+      const res = await axios.get(`${BASE_URL}/api/offers/active`);
       setOffers(res.data?.offers || []);
     } catch (err) {
       console.error(err);
@@ -37,7 +38,7 @@ const Offers = () => {
 
   const fetchOfferCount = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/offers/category/count");
+      const res = await axios.get(`${BASE_URL}/api/offers/category/count`);
       setOfferCount(res.data?.count || 0);
     } catch (err) {
       console.error(err);
@@ -46,7 +47,7 @@ const Offers = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/products/categories");
+      const res = await axios.get(`${BASE_URL}/api/products/categories`);
       setCategories(res.data?.data || []);
     } catch (err) {
       console.error("Category fetch error", err);
@@ -92,7 +93,7 @@ const Offers = () => {
       formData.append("endDate", form.endDate);
 
       await axios.post(
-        "http://localhost:5000/api/offers/category/create",
+        `${BASE_URL}/api/offers/category/create`,
         formData,
         {
           headers: {
@@ -126,7 +127,7 @@ const Offers = () => {
     if (!window.confirm("Delete this offer?")) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/offers/category/${id}`, {
+      await axios.delete(`${BASE_URL}/api/offers/category/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("✅ Offer deleted");
@@ -249,7 +250,7 @@ const Offers = () => {
             </button>
 
             <img
-              src={`http://localhost:5000${o.bannerImage}`}
+              src={`${BASE_URL}${o.bannerImage}`}
               className="h-40 w-full object-cover rounded-t-xl"
             />
 

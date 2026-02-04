@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const Items = () => {
   const token = localStorage.getItem("adminToken");
@@ -33,7 +34,7 @@ const Items = () => {
     try {
       setListLoading(true);
       const res = await axios.get(
-        `http://localhost:5000/api/products/cart?page=${pageNumber}&limit=${limit}`
+        `${BASE_URL}/api/products/cart?page=${pageNumber}&limit=${limit}`
       );
       setProducts(res.data.data || []);
       setPage(res.data.currentPage);
@@ -49,7 +50,7 @@ const Items = () => {
   const fetchCategories = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/products/categories"
+        `${BASE_URL}/api/products/categories`
       );
       setCategories(res.data.data || []);
     } catch (err) {
@@ -83,14 +84,14 @@ const Items = () => {
 
       if (isEditMode) {
         await axios.put(
-          `http://localhost:5000/api/admin/products/edit/${editId}`,
+          `${BASE_URL}/api/admin/products/edit/${editId}`,
           formData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         alert("✅ Product Updated");
       } else {
         await axios.post(
-          "http://localhost:5000/api/admin/products/add",
+          `${BASE_URL}/api/admin/products/add`,
           formData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -131,7 +132,7 @@ const Items = () => {
   const deleteProduct = async (id) => {
     if (!window.confirm("Delete this product?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/products/${id}`, {
+      await axios.delete(`${BASE_URL}/api/products/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchProducts(page);
@@ -265,7 +266,7 @@ const Items = () => {
                             src={
                               p.thumbnail?.startsWith("http")
                                 ? p.thumbnail
-                                : `http://localhost:5000${p.thumbnail}`
+                                : `${BASE_URL}${p.thumbnail}`
                             }
                             alt={p.title}
                             className="h-10 w-10 sm:h-12 sm:w-12 rounded object-cover"

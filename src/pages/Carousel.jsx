@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import React from "react";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const CarouselAdmin = () => {
   const token = localStorage.getItem("adminToken");
@@ -18,7 +19,7 @@ const CarouselAdmin = () => {
   const fetchCategories = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/products/categories"
+        `${BASE_URL}/api/products/categories`
       );
       setCategories(res.data.data || []);
     } catch (err) {
@@ -28,7 +29,7 @@ const CarouselAdmin = () => {
 
   const fetchCarousel = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/carousel");
+      const res = await axios.get(`${BASE_URL}/api/carousel`);
       setCarouselList(res.data || []);
     } catch (err) {
       console.log("Carousel fetch error", err);
@@ -47,7 +48,7 @@ const CarouselAdmin = () => {
     fd.append("category", carouselCategory);
 
     try {
-      await axios.post("http://localhost:5000/api/carousel/add", fd, {
+      await axios.post(`${BASE_URL}/api/carousel/add`, fd, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -66,7 +67,7 @@ const CarouselAdmin = () => {
     if (!window.confirm("Delete carousel image?")) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/carousel/${id}`, {
+      await axios.delete(`${BASE_URL}/api/carousel/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchCarousel();
@@ -161,7 +162,7 @@ const CarouselAdmin = () => {
             >
               {/* IMAGE */}
               <img
-                src={`http://localhost:5000/${c.image}`}
+                src={`${BASE_URL}/${c.image}`}
                 alt="carousel"
                 className="h-44 w-full object-cover"
               />

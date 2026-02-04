@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const Management = () => {
   const [admins, setAdmins] = useState([]);
@@ -13,7 +14,7 @@ const Management = () => {
   const token = localStorage.getItem("adminToken");
 
   const fetchAdmins = async () => {
-    const res = await axios.get("http://localhost:5000/api/users", {
+    const res = await axios.get(`${BASE_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setAdmins(res.data);
@@ -27,7 +28,7 @@ const Management = () => {
     e.preventDefault();
 
     await axios.post(
-      "http://localhost:5000/api/admin/create-product-admin",
+      `${BASE_URL}/api/admin/create-product-admin`,
       form,
       { headers: { Authorization: `Bearer ${token}` } }
     );

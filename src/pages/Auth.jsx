@@ -17,7 +17,7 @@ const Auth = ({ setToken, setUser }) => {
 
     try {
       const res = await axios.post(
-        `${BASE_URL}/api/auth/login`,
+        `${BASE_URL}/api/auth/login`,// done understand how flow work
         { email, password }
       );
 

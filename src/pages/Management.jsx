@@ -14,7 +14,7 @@ const Management = () => {
   const token = localStorage.getItem("adminToken");
 
   const fetchAdmins = async () => {
-    const res = await axios.get(`${BASE_URL}/api/users`, {
+    const res = await axios.get(`${BASE_URL}/api/users`, {//done
       headers: { Authorization: `Bearer ${token}` },
     });
     setAdmins(res.data);
@@ -42,32 +42,33 @@ const Management = () => {
       <h2 className="text-2xl font-bold mb-4">Management</h2>
 
       {/* CREATE ADMIN */}
-      <form onSubmit={submit} className="grid grid-cols-4 gap-4 mb-6">
-        <input className="border p-2" placeholder="Name"
+      <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <input className="border p-2 w-full" placeholder="Name"
           value={form.name}
           onChange={(e)=>setForm({...form,name:e.target.value})} />
 
-        <input className="border p-2" placeholder="Email"
+        <input className="border p-2 w-full" placeholder="Email"
           value={form.email}
           onChange={(e)=>setForm({...form,email:e.target.value})} />
 
-        <input className="border p-2" placeholder="Password"
+        <input className="border p-2 w-full" placeholder="Password"
           value={form.password}
           onChange={(e)=>setForm({...form,password:e.target.value})} />
 
-        <select className="border p-2"
+        <select className="border p-2 w-full"
           value={form.role}
           onChange={(e)=>setForm({...form,role:e.target.value})}>
           <option value="productadmin">Product Admin</option>
           <option value="superadmin">Super Admin</option>
         </select>
 
-        <button className="col-span-4 bg-blue-600 text-white p-2 rounded">
+        <button className="col-span-1 md:col-span-4 bg-blue-600 text-white p-2 rounded w-full">
           Create Admin
         </button>
       </form>
 
       {/* ADMIN TABLE */}
+      <div className="overflow-x-auto">
       <table className="w-full bg-white shadow rounded">
         <thead className="bg-gray-200">
           <tr>
@@ -88,6 +89,7 @@ const Management = () => {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 };

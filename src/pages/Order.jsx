@@ -84,9 +84,8 @@ const AdminOrders = () => {
   }
 
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">📦 Order Management</h1>
+<div className="px-3 sm:px-6 lg:px-8 py-6 bg-gray-100 min-h-screen">      <div className="mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold">📦 Order Management</h1>
         <p className="text-gray-500 mt-1">
           Manage all customer orders from here
         </p>
@@ -98,13 +97,11 @@ const AdminOrders = () => {
         </div>
       ) : (
         <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+<table className="min-w-[700px] w-full text-sm">            <thead className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
               <tr>
                 <th className="px-4 py-4 text-left">Order ID</th>
                 <th className="px-4 py-4 text-left">Customer</th>
-                <th className="px-4 py-4 text-left">Email</th>
-                <th className="px-4 py-4 text-left">Amount</th>
+<th className="hidden md:table-cell px-4 py-4 text-left">Email</th>                <th className="px-4 py-4 text-left">Amount</th>
                 <th className="px-4 py-4 text-left">Status</th>
                 <th className="px-4 py-4 text-left">Action</th>
               </tr>
@@ -124,7 +121,7 @@ const AdminOrders = () => {
                     {order.user?.name || "N/A"}
                   </td>
 
-                  <td className="px-4 py-3">
+                 <td className="hidden md:table-cell px-4 py-3">
                     {order.user?.email || "N/A"}
                   </td>
 
@@ -149,7 +146,7 @@ const AdminOrders = () => {
                       onChange={(e) =>
                         updateStatus(order._id, e.target.value)
                       }
-                      className="border rounded-lg px-3 py-1 text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-60"
+                      className="w-full border rounded-lg px-3 py-1 text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-60"
                     >
                       <option value="PLACED">PLACED</option>
                       <option value="CONFIRMED">CONFIRMED</option>
